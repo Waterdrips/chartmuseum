@@ -33,7 +33,6 @@ _.-'  \        ( \___
 */
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	pathutil "path"
@@ -264,34 +263,34 @@ func (server *MultiTenantServer) addIndexObjectsAsync(log cm_logger.LoggingFn, r
 	cvChan := make(chan cvResult)
 
 	// Provide a mechanism to short-circuit object downloads in case of error
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	//ctx, cancel := context.WithCancel(context.Background())
+	//defer cancel()
 
-	for _, object := range objects {
-		go func(o cm_storage.Object) {
-			if server.IndexLimit != 0 {
-				// Limit parallelism to the index-limit parameter value
-				// if there are more than IndexLimit concurrent fetches, this send will block
-				server.Limiter <- struct{}{}
-				// once work is over, read one Limiter channel item to allow other workers to continue
-				defer func() { <-server.Limiter }()
-			}
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				chartVersion, err := server.getObjectChartVersion(repo, o, true)
-				if err != nil {
-					err = server.checkInvalidChartPackageError(log, repo, o, err, "added")
-					if err != nil {
-						cancel()
-					}
-				}
-				cvChan <- cvResult{chartVersion, err}
-			}
-		}(object)
-	}
-
+	//for _, object := range objects {
+	//	go func(o cm_storage.Object) {
+	//		if server.IndexLimit != 0 {
+	//			Limit parallelism to the index-limit parameter value
+	//			if there are more than IndexLimit concurrent fetches, this send will block
+				//server.Limiter <- struct{}{}
+				//once work is over, read one Limiter channel item to allow other workers to continue
+				//defer func() { <-server.Limiter }()
+			//}
+			//select {
+			//case <-ctx.Done():
+			//	return
+			//default:
+			//	chartVersion, err := server.getObjectChartVersion(repo, o, true)
+			//	if err != nil {
+			//		err = server.checkInvalidChartPackageError(log, repo, o, err, "added")
+			//		if err != nil {
+			//			cancel()
+			//		}
+			//	}
+			//	cvChan <- cvResult{chartVersion, err}
+			//}
+		//}(object)
+	//}
+	//
 	for validCount := 0; validCount < numObjects; validCount++ {
 		cvRes := <-cvChan
 		if cvRes.err != nil {
