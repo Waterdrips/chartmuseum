@@ -63,7 +63,11 @@ func ChartVersionFromStorageObject(object storage.Object) (*helm_repo.ChartVersi
 	if len(object.Content) == 0 {
 		if object.Meta.Version != "" && object.Meta.Name != "" {
 			return &helm_repo.ChartVersion{
-				Metadata: &helm_chart.Metadata{Name: object.Meta.Name, Version: object.Meta.Version},
+				Metadata: &helm_chart.Metadata{
+					Name: object.Meta.Name,
+					Version: object.Meta.Version,
+				},
+				URLs:     []string{fmt.Sprintf("charts/%s", pathutil.Base(object.Path))},
 			}, nil
 		}
 		chartVersion := emptyChartVersionFromPackageFilename(object.Path)
