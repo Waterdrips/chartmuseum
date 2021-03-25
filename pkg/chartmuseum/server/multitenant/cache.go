@@ -36,7 +36,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	pathutil "path"
 	"sync"
 	"time"
@@ -200,22 +199,22 @@ func (server *MultiTenantServer) fetchChartsInStorage(log cm_logger.LoggingFn, r
 	}
 
 	// filter out storage objects that dont have extension used for chart packages (.tgz)
-	filteredObjects := []cm_storage.Object{}
-	for _, object := range allObjects {
-		if object.HasExtension(cm_repo.ChartPackageFileExtension) {
-			log(cm_logger.DebugLevel, "GetObject From Storage Backend", "repo", repo, "path", object.Path)
-			// Since ListObject cannot fetch the content from file list
-			objectDetail, err := server.StorageBackend.GetObject(pathutil.Join(repo, object.Path))
-			if err != nil {
-				return nil, fmt.Errorf("backend storage: chart not found: %q", err)
-			}
-			// do not change other object field except content
-			object.Content = objectDetail.Content
-			filteredObjects = append(filteredObjects, object)
-		}
-	}
+	//filteredObjects := []cm_storage.Object{}
+	//for _, object := range allObjects {
+	//	if object.HasExtension(cm_repo.ChartPackageFileExtension) {
+	//		log(cm_logger.DebugLevel, "GetObject From Storage Backend", "repo", repo, "path", object.Path)
+	//		Since ListObject cannot fetch the content from file list
+			//objectDetail, err := server.StorageBackend.GetObject(pathutil.Join(repo, object.Path))
+			//if err != nil {
+			//	return nil, fmt.Errorf("backend storage: chart not found: %q", err)
+			//}
+			//do not change other object field except content
+			//object.Content = objectDetail.Content
+			//filteredObjects = append(filteredObjects, object)
+		//}
+	//}
 
-	return filteredObjects, nil
+	return allObjects, nil
 }
 
 func (server *MultiTenantServer) removeIndexObject(log cm_logger.LoggingFn, repo string, index *cm_repo.Index, object cm_storage.Object) error {
