@@ -19,17 +19,14 @@ package multitenant
 import (
 	"net/http"
 	pathutil "path"
-	"strings"
 
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
-	cm_repo "helm.sh/chartmuseum/pkg/repo"
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
 
 	"github.com/chartmuseum/storage"
 )
 
 var (
 	chartPackageContentType   = "application/x-tar"
-	provenanceFileContentType = "application/pgp-signature"
 )
 
 type (
@@ -40,16 +37,6 @@ type (
 )
 
 func (server *MultiTenantServer) getStorageObject(log cm_logger.LoggingFn, repo string, filename string) (*StorageObject, *HTTPError) {
-	isChartPackage := strings.HasSuffix(filename, cm_repo.ChartPackageFileExtension)
-	isProvenanceFile := strings.HasSuffix(filename, cm_repo.ProvenanceFileExtension)
-	if !isChartPackage && !isProvenanceFile {
-		log(cm_logger.WarnLevel, "unsupported file extension",
-			"repo", repo,
-			"filename", filename,
-		)
-		return nil, &HTTPError{http.StatusInternalServerError, "unsupported file extension"}
-	}
-
 	objectPath := pathutil.Join(repo, filename)
 
 	object, err := server.StorageBackend.GetObject(objectPath)
@@ -63,12 +50,7 @@ func (server *MultiTenantServer) getStorageObject(log cm_logger.LoggingFn, repo 
 		return nil, &HTTPError{http.StatusNotFound, "object not found"}
 	}
 
-	var contentType string
-	if isProvenanceFile {
-		contentType = provenanceFileContentType
-	} else {
-		contentType = chartPackageContentType
-	}
+	contentType := chartPackageContentType
 
 	storageObject := &StorageObject{
 		Object:      &object,

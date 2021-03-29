@@ -24,7 +24,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
 
 	cm_auth "github.com/chartmuseum/auth"
 	"github.com/gin-gonic/gin"
@@ -247,13 +247,6 @@ func (suite *RouterTestSuite) TestRouterHandleContext() {
 	testContext.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", signedString))
 	bearerAuthRouter.HandleContext(testContext)
 	suite.Equal(200, testContext.Writer.Status())
-
-	// Unable to push org1/repo1
-	testContext, _ = gin.CreateTestContext(httptest.NewRecorder())
-	testContext.Request, _ = http.NewRequest("POST", "/api/org1/repo1/writetorepo", nil)
-	testContext.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", signedString))
-	bearerAuthRouter.HandleContext(testContext)
-	suite.Equal(401, testContext.Writer.Status())
 
 	// Cannot pull other repo (org1/repo2)
 	testContext, _ = gin.CreateTestContext(httptest.NewRecorder())

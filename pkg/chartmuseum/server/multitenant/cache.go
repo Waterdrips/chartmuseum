@@ -34,18 +34,16 @@ _.-'  \        ( \___
 
 import (
 	"encoding/json"
-	"errors"
 	pathutil "path"
 	"sync"
 	"time"
 
 	"go.uber.org/zap"
 
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
-	cm_repo "helm.sh/chartmuseum/pkg/repo"
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
+	cm_repo "github.com/Waterdrips/chartmuseum/pkg/repo"
 
 	cm_storage "github.com/chartmuseum/storage"
-	"github.com/ghodss/yaml"
 	"github.com/gin-gonic/gin"
 	helm_repo "helm.sh/helm/v3/pkg/repo"
 )
@@ -77,18 +75,6 @@ var (
 	EntrySavedMessage             = "Entry saved in cache store"
 	CouldNotSaveEntryErrorMessage = "Could not save entry in cache store"
 )
-
-func (server *MultiTenantServer) primeCache() error {
-	// only prime the cache if this is a single tenant setup
-	if server.Router.Depth == 0 {
-		log := server.Logger.ContextLoggingFn(&gin.Context{})
-		_, err := server.getIndexFile(log, "")
-		if err != nil {
-			return errors.New(err.Message)
-		}
-	}
-	return nil
-}
 
 // getChartList fetches from the server and accumulates concurrent requests to be fulfilled all at once.
 func (server *MultiTenantServer) getChartList(log cm_logger.LoggingFn, repo string) <-chan fetchedObjects {
@@ -196,23 +182,6 @@ func (server *MultiTenantServer) fetchChartsInStorage(log cm_logger.LoggingFn, r
 	if err != nil {
 		return []cm_storage.Object{}, err
 	}
-
-	// filter out storage objects that dont have extension used for chart packages (.tgz)
-	//filteredObjects := []cm_storage.Object{}
-	//for _, object := range allObjects {
-	//	if object.HasExtension(cm_repo.ChartPackageFileExtension) {
-	//		log(cm_logger.DebugLevel, "GetObject From Storage Backend", "repo", repo, "path", object.Path)
-	//		Since ListObject cannot fetch the content from file list
-			//objectDetail, err := server.StorageBackend.GetObject(pathutil.Join(repo, object.Path))
-			//if err != nil {
-			//	return nil, fmt.Errorf("backend storage: chart not found: %q", err)
-			//}
-			//do not change other object field except content
-			//object.Content = objectDetail.Content
-			//filteredObjects = append(filteredObjects, object)
-		//}
-	//}
-
 	return allObjects, nil
 }
 
@@ -260,10 +229,8 @@ func (server *MultiTenantServer) addIndexObjectsAsync(log cm_logger.LoggingFn, r
 		if err != nil {
 			return err
 		}
-
 		index.AddEntry(o)
 	}
-
 	return nil
 }
 
@@ -400,36 +367,7 @@ func (server *MultiTenantServer) newRepositoryIndex(log cm_logger.LoggingFn, rep
 		ContextPath: server.Router.ContextPath,
 	}
 
-	if !server.UseStatefiles {
-		return cm_repo.NewIndex(chartURL, repo, serverInfo)
-	}
-
-	objectPath := pathutil.Join(repo, cm_repo.StatefileFilename)
-	object, err := server.StorageBackend.GetObject(objectPath)
-	if err != nil {
-		return cm_repo.NewIndex(chartURL, repo, serverInfo)
-	}
-
-	indexFile := &cm_repo.IndexFile{}
-	err = yaml.Unmarshal(object.Content, indexFile)
-	if err != nil {
-		log(cm_logger.WarnLevel, "index-cache.yaml found but could not be parsed",
-			"repo", repo,
-			"error", err.Error(),
-		)
-		return cm_repo.NewIndex(chartURL, repo, serverInfo)
-	}
-
-	log(cm_logger.DebugLevel, "index-cache.yaml loaded",
-		"repo", repo,
-	)
-
-	return &cm_repo.Index{
-		IndexFile: indexFile,
-		RepoName:  repo,
-		Raw:       object.Content,
-		ChartURL:  chartURL,
-	}
+	return cm_repo.NewIndex(chartURL, repo, serverInfo)
 }
 
 func (server *MultiTenantServer) initCacheTimer() {
@@ -514,12 +452,6 @@ func (server *MultiTenantServer) startEventListener() {
 			continue
 		}
 
-		if server.UseStatefiles {
-			// Dont wait, save index-cache.yaml to storage in the background.
-			// It is not crucial if this does not succeed, we will just log any errors
-			go server.saveStatefile(log, e.RepoName, entry.RepoIndex.Raw)
-		}
-
 		tenant.RegenerationLock.Unlock()
 		log(cm_logger.DebugLevel, "Event handled successfully", zap.Any("event", e))
 	}
@@ -584,10 +516,4 @@ func (server *MultiTenantServer) refreshCacheEntry(log cm_logger.LoggingFn, repo
 		return
 	}
 	entry.RepoIndex = ir.index
-
-	if server.UseStatefiles {
-		// Dont wait, save index-cache.yaml to storage in the background.
-		// It is not crucial if this does not succeed, we will just log any errors
-		go server.saveStatefile(log, repo, ir.index.Raw)
-	}
 }

@@ -25,7 +25,8 @@ import (
 )
 
 var (
-	validRepoRoute = regexp.MustCompile(`^.*\.(yaml|tgz|prov)$`)
+	// Valid options are index.yaml[EOL} (the index) , v[anything] (charts) and prov[EOL]
+	validRepoRoute = regexp.MustCompile(`^.*\.?(yaml|v.*|prov)$`)
 )
 
 /*

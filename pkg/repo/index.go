@@ -21,13 +21,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	helm_repo "helm.sh/helm/v3/pkg/repo"
-)
-
-var (
-	// IndexFileContentType is the http content-type header for index.yaml
-	IndexFileContentType = "application/x-yaml"
-	StatefileFilename    = "index-cache.yaml"
+	helmrepo "helm.sh/helm/v3/pkg/repo"
 )
 
 type (
@@ -38,7 +32,7 @@ type (
 
 	// IndexFile is a copy of Helm struct with extra data
 	IndexFile struct {
-		*helm_repo.IndexFile
+		*helmrepo.IndexFile
 		ServerInfo *ServerInfo `json:"serverInfo"`
 	}
 
@@ -55,12 +49,12 @@ type (
 // NewIndex creates a new instance of Index
 func NewIndex(chartURL string, repo string, serverInfo *ServerInfo) *Index {
 	indexFile := &IndexFile{
-		IndexFile:  &helm_repo.IndexFile{},
+		IndexFile:  &helmrepo.IndexFile{},
 		ServerInfo: serverInfo,
 	}
 	index := Index{indexFile, repo, []byte{}, chartURL}
-	index.Entries = map[string]helm_repo.ChartVersions{}
-	index.APIVersion = helm_repo.APIVersionV1
+	index.Entries = map[string]helmrepo.ChartVersions{}
+	index.APIVersion = helmrepo.APIVersionV1
 	index.Regenerate()
 	return &index
 }
@@ -79,7 +73,7 @@ func (index *Index) Regenerate() error {
 }
 
 // RemoveEntry removes a chart version from index
-func (index *Index) RemoveEntry(chartVersion *helm_repo.ChartVersion) {
+func (index *Index) RemoveEntry(chartVersion *helmrepo.ChartVersion) {
 	if entries, ok := index.Entries[chartVersion.Name]; ok {
 		for i, cv := range entries {
 			if cv.Version == chartVersion.Version {
@@ -95,9 +89,9 @@ func (index *Index) RemoveEntry(chartVersion *helm_repo.ChartVersion) {
 }
 
 // AddEntry adds a chart version to index
-func (index *Index) AddEntry(chartVersion *helm_repo.ChartVersion) {
+func (index *Index) AddEntry(chartVersion *helmrepo.ChartVersion) {
 	if _, ok := index.Entries[chartVersion.Name]; !ok {
-		index.Entries[chartVersion.Name] = helm_repo.ChartVersions{}
+		index.Entries[chartVersion.Name] = helmrepo.ChartVersions{}
 	}
 	//
 	entries := index.Entries[chartVersion.Name]
@@ -115,7 +109,7 @@ func (index *Index) AddEntry(chartVersion *helm_repo.ChartVersion) {
 }
 
 // HasEntry checks if index has already an entry
-func (index *Index) HasEntry(chartVersion *helm_repo.ChartVersion) bool {
+func (index *Index) HasEntry(chartVersion *helmrepo.ChartVersion) bool {
 	if entries, ok := index.Entries[chartVersion.Name]; ok {
 		for _, cv := range entries {
 			if cv.Version == chartVersion.Version {
@@ -127,7 +121,7 @@ func (index *Index) HasEntry(chartVersion *helm_repo.ChartVersion) bool {
 }
 
 // UpdateEntry updates a chart version in index
-func (index *Index) UpdateEntry(chartVersion *helm_repo.ChartVersion) {
+func (index *Index) UpdateEntry(chartVersion *helmrepo.ChartVersion) {
 	if entries, ok := index.Entries[chartVersion.Name]; ok {
 		for i, cv := range entries {
 			if cv.Version == chartVersion.Version {
@@ -139,9 +133,10 @@ func (index *Index) UpdateEntry(chartVersion *helm_repo.ChartVersion) {
 	}
 }
 
-func (index *Index) setChartURL(chartVersion *helm_repo.ChartVersion) {
+func (index *Index) setChartURL(chartVersion *helmrepo.ChartVersion) {
 	if index.ChartURL != "" {
-		chartVersion.URLs[0] = index.ChartURL + "/" + chartVersion.URLs[0]
+
+		chartVersion.URLs[0] = index.ChartURL + "/" + chartVersion.URL()
 	}
 }
 

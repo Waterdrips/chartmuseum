@@ -96,13 +96,13 @@ func (suite *IndexTestSuite) TestChartURLs() {
 	chartVersion := getChartVersion("a", 0, time.Now())
 	index.AddEntry(chartVersion)
 	suite.Equal("charts/a-1.0.0.tgz",
-		index.Entries["a"][0].URLs[0], "relative chart url")
+		index.Entries["a"][0].URL(), "relative chart url")
 
 	index = NewIndex("http://mysite.com:8080", "", &ServerInfo{})
 	chartVersion = getChartVersion("a", 0, time.Now())
 	index.AddEntry(chartVersion)
 	suite.Equal("http://mysite.com:8080/charts/a-1.0.0.tgz",
-		index.Entries["a"][0].URLs[0], "absolute chart url")
+		index.Entries["a"][0].URL(), "absolute chart url")
 }
 
 func (suite *IndexTestSuite) TestServerInfo() {

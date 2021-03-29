@@ -17,45 +17,27 @@ limitations under the License.
 package multitenant
 
 import (
-	cm_router "helm.sh/chartmuseum/pkg/chartmuseum/router"
+	cm_router "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/router"
 
 	cm_auth "github.com/chartmuseum/auth"
 )
 
-func (s *MultiTenantServer) Routes() []*cm_router.Route {
+func (server *MultiTenantServer) Routes() []*cm_router.Route {
 	var routes []*cm_router.Route
 
 	serverInfoRoutes := []*cm_router.Route{
-		{"GET", "/", s.getWelcomePageHandler, cm_auth.PullAction},
-		{"GET", "/info", s.getInfoHandler, ""},
-		{"GET", "/health", s.getHealthCheckHandler, ""},
+		{"GET", "/", server.getWelcomePageHandler, cm_auth.PullAction},
+		{"GET", "/info", server.getInfoHandler, ""},
+		{"GET", "/health", server.getHealthCheckHandler, ""},
 	}
 
 	helmChartRepositoryRoutes := []*cm_router.Route{
-		{"GET", "/:repo/index.yaml", s.getIndexFileRequestHandler, cm_auth.PullAction},
-		{"GET", "/:repo/charts/:filename", s.getStorageObjectRequestHandler, cm_auth.PullAction},
-	}
-
-	chartManipulationRoutes := []*cm_router.Route{
-		{"GET", "/api/:repo/charts", s.getAllChartsRequestHandler, cm_auth.PullAction},
-		{"HEAD", "/api/:repo/charts/:name", s.headChartRequestHandler, cm_auth.PullAction},
-		{"GET", "/api/:repo/charts/:name", s.getChartRequestHandler, cm_auth.PullAction},
-		{"HEAD", "/api/:repo/charts/:name/:version", s.headChartVersionRequestHandler, cm_auth.PullAction},
-		{"GET", "/api/:repo/charts/:name/:version", s.getChartVersionRequestHandler, cm_auth.PullAction},
-		{"POST", "/api/:repo/charts", s.postRequestHandler, cm_auth.PushAction},
-		{"POST", "/api/:repo/prov", s.postProvenanceFileRequestHandler, cm_auth.PushAction},
+		{"GET", "/:repo/index.yaml", server.getIndexFileRequestHandler, cm_auth.PullAction},
+		{"GET", "/:repo/charts/:filename", server.getStorageObjectRequestHandler, cm_auth.PullAction},
 	}
 
 	routes = append(routes, serverInfoRoutes...)
 	routes = append(routes, helmChartRepositoryRoutes...)
-
-	if s.APIEnabled {
-		routes = append(routes, chartManipulationRoutes...)
-	}
-
-	if s.APIEnabled && !s.DisableDelete {
-		routes = append(routes, &cm_router.Route{"DELETE", "/api/:repo/charts/:name/:version", s.deleteChartVersionRequestHandler, cm_auth.PushAction})
-	}
 
 	return routes
 }

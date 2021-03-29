@@ -23,7 +23,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid"

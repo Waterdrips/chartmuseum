@@ -17,14 +17,14 @@ limitations under the License.
 package chartmuseum
 
 import (
+	"github.com/Waterdrips/chartmuseum/pkg/cache"
 	"strings"
 	"time"
 
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
+	cm_router "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/router"
+	mt "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/server/multitenant"
 	"github.com/chartmuseum/storage"
-	"helm.sh/chartmuseum/pkg/cache"
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
-	cm_router "helm.sh/chartmuseum/pkg/chartmuseum/router"
-	mt "helm.sh/chartmuseum/pkg/chartmuseum/server/multitenant"
 )
 
 type (
@@ -39,25 +39,16 @@ type (
 		TlsCACert              string
 		Username               string
 		Password               string
-		ChartPostFormFieldName string
-		ProvPostFormFieldName  string
 		ContextPath            string
 		LogJSON                bool
 		LogHealth              bool
 		LogLatencyInteger      bool
 		Debug                  bool
-		EnableAPI              bool
-		UseStatefiles          bool
-		AllowOverwrite         bool
-		DisableDelete          bool
-		AllowForceOverwrite    bool
 		EnableMetrics          bool
 		AnonymousGet           bool
 		GenIndex               bool
-		MaxStorageObjects      int
 		IndexLimit             int
 		Depth                  int
-		MaxUploadSize          int
 		BearerAuth             bool
 		AuthRealm              string
 		AuthService            string
@@ -65,10 +56,6 @@ type (
 		DepthDynamic           bool
 		CORSAllowOrigin        string
 		ReadTimeout            int
-		WriteTimeout           int
-		// EnforceSemver2 represents if the museum server always accept the Chart with [valid semantic version 2](https://semver.org/)
-		// More refers to : https://github.com/helm/chartmuseum/issues/320
-		EnforceSemver2 bool
 		CacheInterval  time.Duration
 		Host           string
 		Version        string
@@ -108,7 +95,6 @@ func NewServer(options ServerOptions) (Server, error) {
 		EnableMetrics:     options.EnableMetrics,
 		AnonymousGet:      options.AnonymousGet,
 		Depth:             options.Depth,
-		MaxUploadSize:     options.MaxUploadSize,
 		BearerAuth:        options.BearerAuth,
 		AuthRealm:         options.AuthRealm,
 		AuthService:       options.AuthService,
@@ -116,7 +102,6 @@ func NewServer(options ServerOptions) (Server, error) {
 		DepthDynamic:      options.DepthDynamic,
 		CORSAllowOrigin:   options.CORSAllowOrigin,
 		ReadTimeout:       options.ReadTimeout,
-		WriteTimeout:      options.WriteTimeout,
 		Host:              options.Host,
 	})
 
@@ -127,17 +112,8 @@ func NewServer(options ServerOptions) (Server, error) {
 		ExternalCacheStore:     options.ExternalCacheStore,
 		TimestampTolerance:     options.TimestampTolerance,
 		ChartURL:               strings.TrimSuffix(options.ChartURL, "/"),
-		ChartPostFormFieldName: options.ChartPostFormFieldName,
-		ProvPostFormFieldName:  options.ProvPostFormFieldName,
-		MaxStorageObjects:      options.MaxStorageObjects,
 		IndexLimit:             options.IndexLimit,
 		GenIndex:               options.GenIndex,
-		EnableAPI:              options.EnableAPI,
-		DisableDelete:          options.DisableDelete,
-		UseStatefiles:          options.UseStatefiles,
-		AllowOverwrite:         options.AllowOverwrite,
-		AllowForceOverwrite:    options.AllowForceOverwrite,
-		EnforceSemver2:         options.EnforceSemver2,
 		Version:                options.Version,
 		CacheInterval:          options.CacheInterval,
 	})

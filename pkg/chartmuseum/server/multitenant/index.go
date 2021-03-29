@@ -18,11 +18,10 @@ package multitenant
 
 import (
 	"net/http"
-	pathutil "path"
 
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
+	cm_repo "github.com/Waterdrips/chartmuseum/pkg/repo"
 	cm_storage "github.com/chartmuseum/storage"
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
-	cm_repo "helm.sh/chartmuseum/pkg/repo"
 )
 
 var (
@@ -70,28 +69,9 @@ func (server *MultiTenantServer) getIndexFile(log cm_logger.LoggingFn, repo stri
 				return ir.index, &HTTPError{http.StatusInternalServerError, errStr}
 			}
 			entry.RepoIndex = ir.index
-
-			if server.UseStatefiles {
-				// Dont wait, save index-cache.yaml to storage in the background.
-				// It is not crucial if this does not succeed, we will just log any errors
-				go server.saveStatefile(log, repo, ir.index.Raw)
-			}
 		}
 	}
 	return entry.RepoIndex, nil
-}
-
-func (server *MultiTenantServer) saveStatefile(log cm_logger.LoggingFn, repo string, content []byte) {
-	err := server.StorageBackend.PutObject(pathutil.Join(repo, cm_repo.StatefileFilename), content)
-	if err != nil {
-		log(cm_logger.WarnLevel, "Error saving index-cache.yaml",
-			"repo", repo,
-			"error", err.Error(),
-		)
-	}
-	log(cm_logger.DebugLevel, "index-cache.yaml saved in storage",
-		"repo", repo,
-	)
 }
 
 func (server *MultiTenantServer) getRepoObjectSlice(entry *cacheEntry) []cm_storage.Object {

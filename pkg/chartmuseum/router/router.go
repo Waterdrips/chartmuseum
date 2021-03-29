@@ -25,10 +25,9 @@ import (
 	"regexp"
 	"time"
 
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
 
 	cm_auth "github.com/chartmuseum/auth"
-	limits "github.com/gin-contrib/size"
 	"github.com/gin-gonic/gin"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 )
@@ -67,7 +66,6 @@ type (
 		EnableMetrics     bool
 		AnonymousGet      bool
 		Depth             int
-		MaxUploadSize     int
 		BearerAuth        bool
 		AuthRealm         string
 		AuthService       string
@@ -94,7 +92,6 @@ func NewRouter(options RouterOptions) *Router {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 	engine.Use(requestWrapper(options.Logger, options.LogHealth, options.LogLatencyInteger))
-	engine.Use(limits.RequestSizeLimiter(int64(options.MaxUploadSize)))
 
 	if options.EnableMetrics {
 		p := ginprometheus.NewPrometheus("chartmuseum")

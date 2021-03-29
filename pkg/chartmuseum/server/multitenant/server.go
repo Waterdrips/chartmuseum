@@ -17,29 +17,16 @@ limitations under the License.
 package multitenant
 
 import (
-	"fmt"
-	"os"
 	"sync"
 	"time"
 
-	"helm.sh/chartmuseum/pkg/cache"
-	cm_logger "helm.sh/chartmuseum/pkg/chartmuseum/logger"
-	cm_router "helm.sh/chartmuseum/pkg/chartmuseum/router"
-	cm_repo "helm.sh/chartmuseum/pkg/repo"
+	cm_logger "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/logger"
+	cm_router "github.com/Waterdrips/chartmuseum/pkg/chartmuseum/router"
+	cm_repo "github.com/Waterdrips/chartmuseum/pkg/repo"
+	"github.com/Waterdrips/chartmuseum/pkg/cache"
 
 	"github.com/chartmuseum/storage"
 	cm_storage "github.com/chartmuseum/storage"
-	"github.com/gin-gonic/gin"
-)
-
-var (
-	echo = fmt.Print
-	exit = os.Exit
-)
-
-const (
-	defaultFormField = "chart"
-	defaultProvField = "prov"
 )
 
 type (
@@ -53,15 +40,9 @@ type (
 		InternalCacheStore     map[string]*cacheEntry
 		MaxStorageObjects      int
 		IndexLimit             int
-		AllowOverwrite         bool
-		AllowForceOverwrite    bool
-		APIEnabled             bool
-		DisableDelete          bool
 		UseStatefiles          bool
 		EnforceSemver2         bool
 		ChartURL               string
-		ChartPostFormFieldName string
-		ProvPostFormFieldName  string
 		Version                string
 		Limiter                chan struct{}
 		Tenants                map[string]*tenantInternals
@@ -78,18 +59,11 @@ type (
 		ExternalCacheStore     cache.Store
 		TimestampTolerance     time.Duration
 		ChartURL               string
-		ChartPostFormFieldName string
-		ProvPostFormFieldName  string
 		Version                string
 		MaxStorageObjects      int
 		IndexLimit             int
 		GenIndex               bool
-		AllowOverwrite         bool
-		AllowForceOverwrite    bool
-		EnableAPI              bool
-		DisableDelete          bool
 		UseStatefiles          bool
-		EnforceSemver2         bool
 		CacheInterval          time.Duration
 	}
 
@@ -128,14 +102,7 @@ func NewMultiTenantServer(options MultiTenantServerOptions) (*MultiTenantServer,
 		MaxStorageObjects:      options.MaxStorageObjects,
 		IndexLimit:             options.IndexLimit,
 		ChartURL:               chartURL,
-		ChartPostFormFieldName: options.ChartPostFormFieldName,
-		ProvPostFormFieldName:  options.ProvPostFormFieldName,
-		AllowOverwrite:         options.AllowOverwrite,
-		AllowForceOverwrite:    options.AllowForceOverwrite,
-		APIEnabled:             options.EnableAPI,
-		DisableDelete:          options.DisableDelete,
 		UseStatefiles:          options.UseStatefiles,
-		EnforceSemver2:         options.EnforceSemver2,
 		Version:                options.Version,
 		Limiter:                make(chan struct{}, options.IndexLimit),
 		Tenants:                map[string]*tenantInternals{},
@@ -144,30 +111,15 @@ func NewMultiTenantServer(options MultiTenantServerOptions) (*MultiTenantServer,
 	}
 
 	server.Router.SetRoutes(server.Routes())
-	err := server.primeCache()
-
-	if options.GenIndex && server.Router.Depth == 0 {
-		server.genIndex()
-	}
 
 	server.EventChan = make(chan event, server.IndexLimit)
 	go server.startEventListener()
 	server.initCacheTimer()
 
-	return server, err
+	return server, nil
 }
 
 // Listen starts the router on a given port
 func (server *MultiTenantServer) Listen(port int) {
 	server.Router.Start(port)
-}
-
-func (server *MultiTenantServer) genIndex() {
-	log := server.Logger.ContextLoggingFn(&gin.Context{})
-	entry, err := server.initCacheEntry(log, "")
-	if err != nil {
-		panic(err)
-	}
-	echo(string(entry.RepoIndex.Raw[:]))
-	exit(0)
 }

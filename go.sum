@@ -266,8 +266,6 @@ github.com/garyburd/redigo v0.0.0-20150301180006-535138d7bcd7/go.mod h1:NR3MbYis
 github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
-github.com/gin-contrib/size v0.0.0-20200916080119-37b334d93b20 h1:SsVoJmIFebrXgHADK8JBAVCgMpPg6UxsDGxV9yhVJV4=
-github.com/gin-contrib/size v0.0.0-20200916080119-37b334d93b20/go.mod h1:MnR4Tp9v4OBCvoGBMoYJc4Jh/KUDcfFSxfbWVs+BKuM=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.6.3 h1:ahKqKTFpO5KTPHxWZjEdPScmYaGtLo8Y4DMHoEsnp14=
@@ -1219,8 +1217,6 @@ gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C
 gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
 gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
 gotest.tools/v3 v3.0.2/go.mod h1:3SzNCllyD9/Y+b5r9JIKQ474KzkZyqLqEfYqMsX94Bk=
-helm.sh/chartmuseum v0.13.1 h1:wkjbP2lPj5Qv6jENgCyP3SkyM4eI66ZuMxkV8Y69prE=
-helm.sh/chartmuseum v0.13.1/go.mod h1:Fj2WBgBhStvw53aD8qvZxYHreyjjMMZsAClpWETymZc=
 helm.sh/helm/v3 v3.5.1 h1:XPn6xyH4Lcbx0sdUsVttt2E9jH2oJddpLLZtQH0XNfQ=
 helm.sh/helm/v3 v3.5.1/go.mod h1:bjwXfmGAF+SEuJZ2AtN1xmTuz4FqaNYOJrXP+vtj6Tw=
 honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=

@@ -9,30 +9,7 @@ export PATH="$PWD/testbin:$PATH"
 
 main() {
     export HELM_HOME="$PWD/.helm"
-    install_helm
     package_test_charts
-}
-
-install_helm() {
-    if [ ! -f "testbin/helm" ]; then
-        mkdir -p testbin/
-        [ "$(uname)" == "Darwin" ] && PLATFORM="darwin" || PLATFORM="linux"
-        TARBALL="helm-v${HELM_VERSION}-${PLATFORM}-amd64.tar.gz"
-        wget "https://storage.googleapis.com/kubernetes-helm/${TARBALL}" || \
-          curl -O "https://storage.googleapis.com/kubernetes-helm/${TARBALL}"
-        tar -C testbin/ -xzf $TARBALL
-        rm -f $TARBALL
-        pushd testbin/
-        UNCOMPRESSED_DIR="$(find . -mindepth 1 -maxdepth 1 -type d)"
-        mv $UNCOMPRESSED_DIR/helm .
-        rm -rf $UNCOMPRESSED_DIR
-        chmod +x ./helm
-        popd
-        helm init --client-only
-
-        # remove any repos that come out-of-the-box (i.e. "stable")
-        helm repo list | sed -n '1!p' | awk '{print $1}' | xargs helm repo remove
-    fi
 }
 
 package_test_charts() {

@@ -31,19 +31,13 @@ import (
 )
 
 var (
-	// ChartPackageFileExtension is the file extension used for chart packages
-	ChartPackageFileExtension = "tgz"
-
-	// ChartPackageContentType is the http content-type header for chart packages
-	ChartPackageContentType = "application/x-tar"
-
 	// ErrorInvalidChartPackage is raised when a chart package is invalid
 	ErrorInvalidChartPackage = errors.New("invalid chart package")
 )
 
 // ChartPackageFilenameFromNameVersion returns a chart filename from a name and version
 func ChartPackageFilenameFromNameVersion(name string, version string) string {
-	filename := fmt.Sprintf("%s-%s.%s", name, version, ChartPackageFileExtension)
+	filename := fmt.Sprintf("%s-%s", name, version)
 	return filename
 }
 
@@ -54,7 +48,7 @@ func ChartPackageFilenameFromContent(content []byte) (string, error) {
 		return "", err
 	}
 	meta := chart.Metadata
-	filename := fmt.Sprintf("%s-%s.%s", meta.Name, meta.Version, ChartPackageFileExtension)
+	filename := fmt.Sprintf("%s-%s", meta.Name, meta.Version)
 	return filename, nil
 }
 
@@ -81,14 +75,9 @@ func ChartVersionFromStorageObject(object storage.Object) (*helm_repo.ChartVersi
 	if err != nil {
 		return nil, ErrorInvalidChartPackage
 	}
-	digest, err := provenanceDigestFromContent(object.Content)
-	if err != nil {
-		return nil, err
-	}
 	chartVersion := &helm_repo.ChartVersion{
 		URLs:     []string{fmt.Sprintf("charts/%s", pathutil.Base(object.Path))},
 		Metadata: chart.Metadata,
-		Digest:   digest,
 		Created:  object.LastModified,
 	}
 	return chartVersion, nil
@@ -103,7 +92,7 @@ func StorageObjectFromChartVersion(chartVersion *helm_repo.ChartVersion) storage
 	}
 	object := storage.Object{
 		Meta:         meta,
-		Path:         pathutil.Base(chartVersion.URLs[0]),
+		Path:         pathutil.Base(chartVersion.URL()),
 		Content:      []byte{},
 		LastModified: chartVersion.Created,
 	}
@@ -116,8 +105,7 @@ func chartFromContent(content []byte) (*helm_chart.Chart, error) {
 }
 
 func emptyChartVersionFromPackageFilename(filename string) *helm_repo.ChartVersion {
-	noExt := strings.TrimSuffix(pathutil.Base(filename), fmt.Sprintf(".%s", ChartPackageFileExtension))
-	parts := strings.Split(noExt, "-")
+	parts := strings.Split(filename, "-")
 	lastIndex := len(parts) - 1
 	name := parts[0]
 	version := ""
@@ -135,5 +123,5 @@ func emptyChartVersionFromPackageFilename(filename string) *helm_repo.ChartVersi
 	}
 
 	metadata := &helm_chart.Metadata{Name: name, Version: version}
-	return &helm_repo.ChartVersion{Metadata: metadata}
+	return &helm_repo.ChartVersion{Metadata: metadata, URLs: make([]string,1)}
 }
